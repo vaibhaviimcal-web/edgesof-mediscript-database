@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EdgesOf MediScript - Database Setup</title>
+  <title>EdgesOf MediScript - One-Click Database Setup</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -17,38 +17,53 @@
       font-family: 'Courier New', monospace;
       font-size: 14px;
       line-height: 1.6;
+      max-height: 500px;
     }
   </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-8">
   <div class="max-w-6xl mx-auto">
     <div class="bg-white rounded-2xl shadow-2xl p-10 mb-8">
-      <h1 class="text-4xl font-bold text-gray-900 mb-4">🗄️ EdgesOf MediScript Database Setup</h1>
-      <p class="text-xl text-gray-600 mb-8">Complete SQL Schema for Supabase</p>
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">🚀 One-Click Database Setup</h1>
+      <p class="text-xl text-gray-600 mb-8">Set up your entire database in 3 simple steps</p>
 
-      <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-xl mb-8">
-        <h3 class="font-bold text-blue-900 mb-2">📋 Instructions:</h3>
-        <ol class="list-decimal list-inside space-y-2 text-blue-800">
-          <li>Go to your Supabase Dashboard</li>
-          <li>Click on "SQL Editor" in the left sidebar</li>
-          <li>Click "New Query"</li>
-          <li>Copy the SQL code below</li>
-          <li>Paste it in the SQL Editor</li>
-          <li>Click "Run" button</li>
-          <li>Wait for completion (30-60 seconds)</li>
-        </ol>
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8 rounded-2xl mb-8">
+        <h2 class="text-3xl font-bold mb-4">⚡ Super Simple Setup</h2>
+        <div class="space-y-4 text-lg">
+          <div class="flex items-start gap-4">
+            <div class="bg-white text-blue-600 rounded-full w-10 h-10 flex items-center justify-center font-bold flex-shrink-0">1</div>
+            <div>
+              <p class="font-bold">Click the "Copy SQL" button below</p>
+              <p class="text-blue-100 text-sm">This copies the complete database setup code</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="bg-white text-blue-600 rounded-full w-10 h-10 flex items-center justify-center font-bold flex-shrink-0">2</div>
+            <div>
+              <p class="font-bold">Go to Supabase → SQL Editor → New Query</p>
+              <p class="text-blue-100 text-sm">Open your Supabase dashboard and create a new SQL query</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="bg-white text-blue-600 rounded-full w-10 h-10 flex items-center justify-center font-bold flex-shrink-0">3</div>
+            <div>
+              <p class="font-bold">Paste and click "Run"</p>
+              <p class="text-blue-100 text-sm">That's it! Your database will be ready in 60 seconds</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="mb-8">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-bold text-gray-900">Complete Database Schema</h2>
-          <button onclick="copySQL()" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-            📋 Copy SQL
+          <h2 class="text-2xl font-bold text-gray-900">📋 Complete SQL Schema</h2>
+          <button onclick="copySQL()" id="copyBtn" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition transform hover:scale-105">
+            📋 Copy SQL (Click Me!)
           </button>
         </div>
         
-        <div class="code-block" id="sqlCode">-- EdgesOf MediScript - Complete Database Schema
--- Run this in Supabase SQL Editor
+        <div class="code-block" id="sqlCode">-- EdgesOf MediScript - Complete Database Setup
+-- Copy this entire code and paste in Supabase SQL Editor
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -57,7 +72,6 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- CLINICS & USERS
 -- =====================================================
 
--- Clinics Table
 CREATE TABLE IF NOT EXISTS clinics (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
@@ -77,7 +91,6 @@ CREATE TABLE IF NOT EXISTS clinics (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Users Table
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
@@ -100,7 +113,6 @@ CREATE TABLE IF NOT EXISTS users (
 -- PATIENTS
 -- =====================================================
 
--- Patients Table
 CREATE TABLE IF NOT EXISTS patients (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
@@ -135,7 +147,6 @@ CREATE TABLE IF NOT EXISTS patients (
 -- APPOINTMENTS
 -- =====================================================
 
--- Appointments Table
 CREATE TABLE IF NOT EXISTS appointments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
@@ -156,7 +167,6 @@ CREATE TABLE IF NOT EXISTS appointments (
 -- OPD VISITS
 -- =====================================================
 
--- OPD Visits Table
 CREATE TABLE IF NOT EXISTS opd_visits (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
@@ -176,7 +186,6 @@ CREATE TABLE IF NOT EXISTS opd_visits (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Vitals Table
 CREATE TABLE IF NOT EXISTS vitals (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     opd_visit_id UUID REFERENCES opd_visits(id) ON DELETE CASCADE,
@@ -196,7 +205,6 @@ CREATE TABLE IF NOT EXISTS vitals (
 -- MEDICINES & PRESCRIPTIONS
 -- =====================================================
 
--- Medicines Master Table
 CREATE TABLE IF NOT EXISTS medicines (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
@@ -215,7 +223,6 @@ CREATE TABLE IF NOT EXISTS medicines (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Prescriptions Table
 CREATE TABLE IF NOT EXISTS prescriptions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
@@ -232,7 +239,6 @@ CREATE TABLE IF NOT EXISTS prescriptions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Prescription Items Table
 CREATE TABLE IF NOT EXISTS prescription_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     prescription_id UUID REFERENCES prescriptions(id) ON DELETE CASCADE,
@@ -249,7 +255,6 @@ CREATE TABLE IF NOT EXISTS prescription_items (
 -- BILLING
 -- =====================================================
 
--- Invoices Table
 CREATE TABLE IF NOT EXISTS invoices (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
@@ -267,7 +272,6 @@ CREATE TABLE IF NOT EXISTS invoices (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Invoice Items
 CREATE TABLE IF NOT EXISTS invoice_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     invoice_id UUID REFERENCES invoices(id) ON DELETE CASCADE,
@@ -279,7 +283,6 @@ CREATE TABLE IF NOT EXISTS invoice_items (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Payments Table
 CREATE TABLE IF NOT EXISTS payments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
@@ -298,7 +301,6 @@ CREATE TABLE IF NOT EXISTS payments (
 -- LAB TESTS
 -- =====================================================
 
--- Lab Tests Master
 CREATE TABLE IF NOT EXISTS lab_tests (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     test_name VARCHAR(255) NOT NULL,
@@ -311,7 +313,6 @@ CREATE TABLE IF NOT EXISTS lab_tests (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Lab Orders
 CREATE TABLE IF NOT EXISTS lab_orders (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
@@ -325,7 +326,6 @@ CREATE TABLE IF NOT EXISTS lab_orders (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Lab Order Items
 CREATE TABLE IF NOT EXISTS lab_order_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     lab_order_id UUID REFERENCES lab_orders(id) ON DELETE CASCADE,
@@ -339,7 +339,7 @@ CREATE TABLE IF NOT EXISTS lab_order_items (
 );
 
 -- =====================================================
--- INDEXES FOR PERFORMANCE
+-- INDEXES
 -- =====================================================
 
 CREATE INDEX IF NOT EXISTS idx_patients_clinic ON patients(clinic_id);
@@ -356,96 +356,98 @@ CREATE INDEX IF NOT EXISTS idx_prescriptions_patient ON prescriptions(patient_id
 -- DEMO DATA
 -- =====================================================
 
--- Insert demo clinic
 INSERT INTO clinics (name, address, city, state, phone, email) 
 VALUES ('City Health Clinic', '123 Main Street', 'Mumbai', 'Maharashtra', '+91-9876543210', 'info@cityhealthclinic.com')
 ON CONFLICT DO NOTHING;
 
--- Insert demo user
 INSERT INTO users (clinic_id, email, full_name, role, qualification, specialization)
 SELECT id, 'doctor@clinic.com', 'Dr. Rajesh Sharma', 'doctor', 'MBBS, MD', 'General Medicine'
 FROM clinics WHERE name = 'City Health Clinic'
 ON CONFLICT (email) DO NOTHING;
 
--- Insert demo medicines
 INSERT INTO medicines (name, generic_name, brand_name, strength, unit, form, category, price) VALUES
 ('Paracetamol', 'Paracetamol', 'Crocin', '500', 'mg', 'Tablet', 'Analgesic', 5.00),
 ('Amoxicillin', 'Amoxicillin', 'Novamox', '500', 'mg', 'Capsule', 'Antibiotic', 15.00),
 ('Azithromycin', 'Azithromycin', 'Azithral', '500', 'mg', 'Tablet', 'Antibiotic', 25.00),
 ('Omeprazole', 'Omeprazole', 'Omez', '20', 'mg', 'Capsule', 'Antacid', 8.00),
-('Cetirizine', 'Cetirizine', 'Cetrizet', '10', 'mg', 'Tablet', 'Antihistamine', 3.00)
+('Cetirizine', 'Cetirizine', 'Cetrizet', '10', 'mg', 'Tablet', 'Antihistamine', 3.00),
+('Metformin', 'Metformin', 'Glycomet', '500', 'mg', 'Tablet', 'Antidiabetic', 6.00),
+('Amlodipine', 'Amlodipine', 'Amlodac', '5', 'mg', 'Tablet', 'Antihypertensive', 4.00),
+('Atorvastatin', 'Atorvastatin', 'Atorva', '10', 'mg', 'Tablet', 'Lipid Lowering', 12.00)
 ON CONFLICT DO NOTHING;
 
--- Insert demo patients
 INSERT INTO patients (clinic_id, patient_id, first_name, last_name, age, gender, blood_group, phone, allergies, chronic_conditions)
-SELECT 
-    c.id,
-    'P001',
-    'Rajesh',
-    'Kumar',
-    45,
-    'Male',
-    'O+',
-    '+919876543220',
-    ARRAY['Penicillin'],
-    ARRAY['Diabetes']
+SELECT c.id, 'P001', 'Rajesh', 'Kumar', 45, 'Male', 'O+', '+919876543220', ARRAY['Penicillin'], ARRAY['Diabetes']
 FROM clinics c WHERE c.name = 'City Health Clinic'
 ON CONFLICT (patient_id) DO NOTHING;
 
 INSERT INTO patients (clinic_id, patient_id, first_name, last_name, age, gender, blood_group, phone, allergies, chronic_conditions)
-SELECT 
-    c.id,
-    'P002',
-    'Priya',
-    'Sharma',
-    32,
-    'Female',
-    'A+',
-    '+919876543221',
-    ARRAY[]::TEXT[],
-    ARRAY[]::TEXT[]
+SELECT c.id, 'P002', 'Priya', 'Sharma', 32, 'Female', 'A+', '+919876543221', ARRAY[]::TEXT[], ARRAY[]::TEXT[]
 FROM clinics c WHERE c.name = 'City Health Clinic'
 ON CONFLICT (patient_id) DO NOTHING;
 
 INSERT INTO patients (clinic_id, patient_id, first_name, last_name, age, gender, blood_group, phone, allergies, chronic_conditions)
-SELECT 
-    c.id,
-    'P003',
-    'Amit',
-    'Patel',
-    28,
-    'Male',
-    'B+',
-    '+919876543222',
-    ARRAY['Sulfa'],
-    ARRAY[]::TEXT[]
+SELECT c.id, 'P003', 'Amit', 'Patel', 28, 'Male', 'B+', '+919876543222', ARRAY['Sulfa'], ARRAY[]::TEXT[]
+FROM clinics c WHERE c.name = 'City Health Clinic'
+ON CONFLICT (patient_id) DO NOTHING;
+
+INSERT INTO patients (clinic_id, patient_id, first_name, last_name, age, gender, blood_group, phone, allergies, chronic_conditions)
+SELECT c.id, 'P004', 'Sneha', 'Reddy', 55, 'Female', 'AB+', '+919876543223', ARRAY[]::TEXT[], ARRAY['Hypertension']
+FROM clinics c WHERE c.name = 'City Health Clinic'
+ON CONFLICT (patient_id) DO NOTHING;
+
+INSERT INTO patients (clinic_id, patient_id, first_name, last_name, age, gender, blood_group, phone, allergies, chronic_conditions)
+SELECT c.id, 'P005', 'Vikram', 'Singh', 38, 'Male', 'O-', '+919876543224', ARRAY[]::TEXT[], ARRAY[]::TEXT[]
 FROM clinics c WHERE c.name = 'City Health Clinic'
 ON CONFLICT (patient_id) DO NOTHING;
 
 -- Success message
-SELECT 'Database setup completed successfully! ✅' as status;</div>
+SELECT '✅ Database setup completed successfully! You now have 15 tables and demo data ready.' as status;</div>
       </div>
 
-      <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded-xl mt-8">
-        <h3 class="font-bold text-green-900 mb-2">✅ What This Creates:</h3>
-        <ul class="list-disc list-inside space-y-2 text-green-800">
-          <li><strong>15 Tables:</strong> Clinics, Users, Patients, Appointments, OPD, Prescriptions, Billing, Lab Tests</li>
-          <li><strong>Demo Data:</strong> 1 Clinic, 1 Doctor, 3 Patients, 5 Medicines</li>
-          <li><strong>Indexes:</strong> Optimized for fast queries</li>
-          <li><strong>Relationships:</strong> All foreign keys properly set</li>
-          <li><strong>Ready to Use:</strong> Start adding real data immediately</li>
-        </ul>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded-xl">
+          <h3 class="font-bold text-green-900 mb-3">✅ What Gets Created:</h3>
+          <ul class="space-y-2 text-green-800 text-sm">
+            <li>✓ <strong>15 Tables:</strong> Complete database structure</li>
+            <li>✓ <strong>1 Clinic:</strong> City Health Clinic</li>
+            <li>✓ <strong>1 Doctor:</strong> Dr. Rajesh Sharma</li>
+            <li>✓ <strong>5 Patients:</strong> Ready to test</li>
+            <li>✓ <strong>8 Medicines:</strong> Common drugs</li>
+            <li>✓ <strong>Indexes:</strong> Optimized queries</li>
+          </ul>
+        </div>
+
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-xl">
+          <h3 class="font-bold text-blue-900 mb-3">⚡ After Setup:</h3>
+          <ul class="space-y-2 text-blue-800 text-sm">
+            <li>✓ Data persists forever (no more refresh loss)</li>
+            <li>✓ Multi-user support ready</li>
+            <li>✓ Mobile app can connect</li>
+            <li>✓ Real-time sync enabled</li>
+            <li>✓ Production ready</li>
+            <li>✓ Scalable to 1000s of patients</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="mt-8 bg-blue-900 text-white p-8 rounded-2xl">
-        <h3 class="text-2xl font-bold mb-4">🚀 Next Steps After Running SQL:</h3>
-        <ol class="list-decimal list-inside space-y-3 text-lg">
-          <li>Verify all tables are created (check Tables section in Supabase)</li>
-          <li>Confirm demo data is inserted</li>
-          <li>Share confirmation with me</li>
-          <li>I'll connect the application to database</li>
-          <li>You'll have a fully functional app with real data!</li>
+      <div class="mt-8 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-8 rounded-2xl">
+        <h3 class="text-2xl font-bold mb-4">🎯 After Running the SQL:</h3>
+        <p class="text-lg mb-4">Just tell me "Done!" and I'll:</p>
+        <ol class="list-decimal list-inside space-y-2 text-lg">
+          <li>Connect the application to your database</li>
+          <li>Replace all demo data with real database queries</li>
+          <li>Test all features</li>
+          <li>Deploy the updated application</li>
+          <li>Give you a fully functional production-ready app!</li>
         </ol>
+      </div>
+
+      <div class="mt-8 text-center">
+        <button onclick="copySQL()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-12 py-6 rounded-2xl font-bold text-2xl hover:shadow-2xl transition transform hover:scale-105 animate-pulse">
+          📋 Click Here to Copy SQL
+        </button>
+        <p class="mt-4 text-gray-600">Then paste in Supabase SQL Editor and click Run</p>
       </div>
     </div>
   </div>
@@ -454,7 +456,13 @@ SELECT 'Database setup completed successfully! ✅' as status;</div>
     function copySQL() {
       const sqlCode = document.getElementById('sqlCode').textContent;
       navigator.clipboard.writeText(sqlCode).then(() => {
-        alert('✅ SQL copied to clipboard! Now paste it in Supabase SQL Editor.');
+        const btn = document.getElementById('copyBtn');
+        btn.innerHTML = '✅ Copied! Now paste in Supabase';
+        btn.className = 'bg-gradient-to-r from-green-600 to-emerald-700 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-2xl';
+        
+        setTimeout(() => {
+          alert('✅ SQL Copied!\n\nNext Steps:\n1. Go to Supabase Dashboard\n2. Click SQL Editor\n3. Click New Query\n4. Paste (Ctrl+V)\n5. Click Run\n6. Tell me "Done!"');
+        }, 100);
       });
     }
   </script>
