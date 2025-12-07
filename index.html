@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EdgesOf MediScript - Database Setup</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    .code-block {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 24px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-8">
+  <div class="max-w-6xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-2xl p-10 mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">🗄️ EdgesOf MediScript Database Setup</h1>
+      <p class="text-xl text-gray-600 mb-8">Complete SQL Schema for Supabase</p>
+
+      <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-xl mb-8">
+        <h3 class="font-bold text-blue-900 mb-2">📋 Instructions:</h3>
+        <ol class="list-decimal list-inside space-y-2 text-blue-800">
+          <li>Go to your Supabase Dashboard</li>
+          <li>Click on "SQL Editor" in the left sidebar</li>
+          <li>Click "New Query"</li>
+          <li>Copy the SQL code below</li>
+          <li>Paste it in the SQL Editor</li>
+          <li>Click "Run" button</li>
+          <li>Wait for completion (30-60 seconds)</li>
+        </ol>
+      </div>
+
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold text-gray-900">Complete Database Schema</h2>
+          <button onclick="copySQL()" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+            📋 Copy SQL
+          </button>
+        </div>
+        
+        <div class="code-block" id="sqlCode">-- EdgesOf MediScript - Complete Database Schema
+-- Run this in Supabase SQL Editor
+
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- =====================================================
+-- CLINICS & USERS
+-- =====================================================
+
+-- Clinics Table
+CREATE TABLE IF NOT EXISTS clinics (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    registration_number VARCHAR(100),
+    address TEXT,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    pincode VARCHAR(10),
+    phone VARCHAR(20),
+    email VARCHAR(255),
+    website VARCHAR(255),
+    logo_url TEXT,
+    subscription_plan VARCHAR(50) DEFAULT 'free',
+    subscription_status VARCHAR(50) DEFAULT 'active',
+    settings JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Users Table
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(20),
+    full_name VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL CHECK (role IN ('admin', 'doctor', 'receptionist', 'nurse', 'pharmacist')),
+    qualification VARCHAR(255),
+    specialization VARCHAR(255),
+    registration_number VARCHAR(100),
+    signature_url TEXT,
+    photo_url TEXT,
+    is_active BOOLEAN DEFAULT true,
+    settings JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =====================================================
+-- PATIENTS
+-- =====================================================
+
+-- Patients Table
+CREATE TABLE IF NOT EXISTS patients (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
+    patient_id VARCHAR(50) UNIQUE NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100),
+    date_of_birth DATE,
+    age INTEGER,
+    gender VARCHAR(20) CHECK (gender IN ('Male', 'Female', 'Other')),
+    blood_group VARCHAR(10),
+    phone VARCHAR(20),
+    email VARCHAR(255),
+    address TEXT,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    pincode VARCHAR(10),
+    emergency_contact_name VARCHAR(255),
+    emergency_contact_phone VARCHAR(20),
+    photo_url TEXT,
+    allergies TEXT[],
+    chronic_conditions TEXT[],
+    family_history TEXT,
+    insurance_provider VARCHAR(255),
+    insurance_number VARCHAR(100),
+    is_active BOOLEAN DEFAULT true,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =====================================================
+-- APPOINTMENTS
+-- =====================================================
+
+-- Appointments Table
+CREATE TABLE IF NOT EXISTS appointments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
+    patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
+    doctor_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    appointment_date DATE NOT NULL,
+    appointment_time TIME NOT NULL,
+    duration INTEGER DEFAULT 15,
+    type VARCHAR(50) CHECK (type IN ('consultation', 'follow-up', 'emergency', 'telemedicine')),
+    status VARCHAR(50) DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'confirmed', 'in-progress', 'completed', 'cancelled', 'no-show')),
+    reason TEXT,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =====================================================
+-- OPD VISITS
+-- =====================================================
+
+-- OPD Visits Table
+CREATE TABLE IF NOT EXISTS opd_visits (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
+    patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
+    doctor_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    appointment_id UUID REFERENCES appointments(id),
+    visit_number VARCHAR(50) UNIQUE NOT NULL,
+    visit_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    visit_type VARCHAR(50) CHECK (visit_type IN ('new', 'follow-up', 'emergency')),
+    chief_complaint TEXT,
+    history_present_illness TEXT,
+    examination_notes TEXT,
+    diagnosis TEXT[],
+    clinical_notes TEXT,
+    status VARCHAR(50) DEFAULT 'in-progress' CHECK (status IN ('in-progress', 'completed', 'cancelled')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Vitals Table
+CREATE TABLE IF NOT EXISTS vitals (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    opd_visit_id UUID REFERENCES opd_visits(id) ON DELETE CASCADE,
+    blood_pressure_systolic INTEGER,
+    blood_pressure_diastolic INTEGER,
+    temperature DECIMAL(4,1),
+    pulse INTEGER,
+    respiratory_rate INTEGER,
+    spo2 INTEGER,
+    weight DECIMAL(5,2),
+    height DECIMAL(5,2),
+    bmi DECIMAL(4,2),
+    recorded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =====================================================
+-- MEDICINES & PRESCRIPTIONS
+-- =====================================================
+
+-- Medicines Master Table
+CREATE TABLE IF NOT EXISTS medicines (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    generic_name VARCHAR(255),
+    brand_name VARCHAR(255),
+    manufacturer VARCHAR(255),
+    strength VARCHAR(50),
+    unit VARCHAR(20),
+    form VARCHAR(50) CHECK (form IN ('Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Ointment', 'Drops', 'Inhaler')),
+    category VARCHAR(100),
+    interactions TEXT[],
+    side_effects TEXT[],
+    price DECIMAL(10,2),
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Prescriptions Table
+CREATE TABLE IF NOT EXISTS prescriptions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
+    patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
+    doctor_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    opd_visit_id UUID REFERENCES opd_visits(id),
+    prescription_number VARCHAR(50) UNIQUE NOT NULL,
+    prescription_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    diagnosis TEXT[],
+    additional_instructions TEXT,
+    follow_up_date DATE,
+    status VARCHAR(50) DEFAULT 'draft' CHECK (status IN ('draft', 'approved', 'dispensed')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Prescription Items Table
+CREATE TABLE IF NOT EXISTS prescription_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    prescription_id UUID REFERENCES prescriptions(id) ON DELETE CASCADE,
+    medicine_id UUID REFERENCES medicines(id),
+    medicine_name VARCHAR(255) NOT NULL,
+    dosage VARCHAR(100),
+    frequency VARCHAR(100),
+    duration VARCHAR(100),
+    instructions TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =====================================================
+-- BILLING
+-- =====================================================
+
+-- Invoices Table
+CREATE TABLE IF NOT EXISTS invoices (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
+    patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
+    invoice_number VARCHAR(50) UNIQUE NOT NULL,
+    invoice_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    subtotal DECIMAL(10,2) NOT NULL,
+    tax_amount DECIMAL(10,2) DEFAULT 0,
+    discount_amount DECIMAL(10,2) DEFAULT 0,
+    total_amount DECIMAL(10,2) NOT NULL,
+    paid_amount DECIMAL(10,2) DEFAULT 0,
+    balance_amount DECIMAL(10,2),
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'partial', 'paid', 'cancelled')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Invoice Items
+CREATE TABLE IF NOT EXISTS invoice_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    invoice_id UUID REFERENCES invoices(id) ON DELETE CASCADE,
+    item_type VARCHAR(50) CHECK (item_type IN ('consultation', 'procedure', 'medicine', 'lab-test', 'other')),
+    description TEXT,
+    quantity INTEGER DEFAULT 1,
+    unit_price DECIMAL(10,2),
+    amount DECIMAL(10,2),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Payments Table
+CREATE TABLE IF NOT EXISTS payments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
+    invoice_id UUID REFERENCES invoices(id) ON DELETE CASCADE,
+    patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
+    payment_number VARCHAR(50) UNIQUE NOT NULL,
+    payment_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    amount DECIMAL(10,2) NOT NULL,
+    payment_method VARCHAR(50) CHECK (payment_method IN ('cash', 'card', 'upi', 'netbanking', 'insurance')),
+    transaction_id VARCHAR(255),
+    status VARCHAR(50) DEFAULT 'completed' CHECK (status IN ('pending', 'completed', 'failed', 'refunded')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =====================================================
+-- LAB TESTS
+-- =====================================================
+
+-- Lab Tests Master
+CREATE TABLE IF NOT EXISTS lab_tests (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    test_name VARCHAR(255) NOT NULL,
+    test_code VARCHAR(50),
+    category VARCHAR(100),
+    normal_range VARCHAR(255),
+    unit VARCHAR(50),
+    price DECIMAL(10,2),
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Lab Orders
+CREATE TABLE IF NOT EXISTS lab_orders (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
+    patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
+    doctor_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    opd_visit_id UUID REFERENCES opd_visits(id),
+    order_number VARCHAR(50) UNIQUE NOT NULL,
+    order_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'collected', 'processing', 'completed', 'cancelled')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Lab Order Items
+CREATE TABLE IF NOT EXISTS lab_order_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    lab_order_id UUID REFERENCES lab_orders(id) ON DELETE CASCADE,
+    lab_test_id UUID REFERENCES lab_tests(id),
+    test_name VARCHAR(255),
+    result VARCHAR(255),
+    normal_range VARCHAR(255),
+    unit VARCHAR(50),
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =====================================================
+-- INDEXES FOR PERFORMANCE
+-- =====================================================
+
+CREATE INDEX IF NOT EXISTS idx_patients_clinic ON patients(clinic_id);
+CREATE INDEX IF NOT EXISTS idx_patients_patient_id ON patients(patient_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_clinic ON appointments(clinic_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_patient ON appointments(patient_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(appointment_date);
+CREATE INDEX IF NOT EXISTS idx_opd_visits_clinic ON opd_visits(clinic_id);
+CREATE INDEX IF NOT EXISTS idx_opd_visits_patient ON opd_visits(patient_id);
+CREATE INDEX IF NOT EXISTS idx_prescriptions_clinic ON prescriptions(clinic_id);
+CREATE INDEX IF NOT EXISTS idx_prescriptions_patient ON prescriptions(patient_id);
+
+-- =====================================================
+-- DEMO DATA
+-- =====================================================
+
+-- Insert demo clinic
+INSERT INTO clinics (name, address, city, state, phone, email) 
+VALUES ('City Health Clinic', '123 Main Street', 'Mumbai', 'Maharashtra', '+91-9876543210', 'info@cityhealthclinic.com')
+ON CONFLICT DO NOTHING;
+
+-- Insert demo user
+INSERT INTO users (clinic_id, email, full_name, role, qualification, specialization)
+SELECT id, 'doctor@clinic.com', 'Dr. Rajesh Sharma', 'doctor', 'MBBS, MD', 'General Medicine'
+FROM clinics WHERE name = 'City Health Clinic'
+ON CONFLICT (email) DO NOTHING;
+
+-- Insert demo medicines
+INSERT INTO medicines (name, generic_name, brand_name, strength, unit, form, category, price) VALUES
+('Paracetamol', 'Paracetamol', 'Crocin', '500', 'mg', 'Tablet', 'Analgesic', 5.00),
+('Amoxicillin', 'Amoxicillin', 'Novamox', '500', 'mg', 'Capsule', 'Antibiotic', 15.00),
+('Azithromycin', 'Azithromycin', 'Azithral', '500', 'mg', 'Tablet', 'Antibiotic', 25.00),
+('Omeprazole', 'Omeprazole', 'Omez', '20', 'mg', 'Capsule', 'Antacid', 8.00),
+('Cetirizine', 'Cetirizine', 'Cetrizet', '10', 'mg', 'Tablet', 'Antihistamine', 3.00)
+ON CONFLICT DO NOTHING;
+
+-- Insert demo patients
+INSERT INTO patients (clinic_id, patient_id, first_name, last_name, age, gender, blood_group, phone, allergies, chronic_conditions)
+SELECT 
+    c.id,
+    'P001',
+    'Rajesh',
+    'Kumar',
+    45,
+    'Male',
+    'O+',
+    '+919876543220',
+    ARRAY['Penicillin'],
+    ARRAY['Diabetes']
+FROM clinics c WHERE c.name = 'City Health Clinic'
+ON CONFLICT (patient_id) DO NOTHING;
+
+INSERT INTO patients (clinic_id, patient_id, first_name, last_name, age, gender, blood_group, phone, allergies, chronic_conditions)
+SELECT 
+    c.id,
+    'P002',
+    'Priya',
+    'Sharma',
+    32,
+    'Female',
+    'A+',
+    '+919876543221',
+    ARRAY[]::TEXT[],
+    ARRAY[]::TEXT[]
+FROM clinics c WHERE c.name = 'City Health Clinic'
+ON CONFLICT (patient_id) DO NOTHING;
+
+INSERT INTO patients (clinic_id, patient_id, first_name, last_name, age, gender, blood_group, phone, allergies, chronic_conditions)
+SELECT 
+    c.id,
+    'P003',
+    'Amit',
+    'Patel',
+    28,
+    'Male',
+    'B+',
+    '+919876543222',
+    ARRAY['Sulfa'],
+    ARRAY[]::TEXT[]
+FROM clinics c WHERE c.name = 'City Health Clinic'
+ON CONFLICT (patient_id) DO NOTHING;
+
+-- Success message
+SELECT 'Database setup completed successfully! ✅' as status;</div>
+      </div>
+
+      <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded-xl mt-8">
+        <h3 class="font-bold text-green-900 mb-2">✅ What This Creates:</h3>
+        <ul class="list-disc list-inside space-y-2 text-green-800">
+          <li><strong>15 Tables:</strong> Clinics, Users, Patients, Appointments, OPD, Prescriptions, Billing, Lab Tests</li>
+          <li><strong>Demo Data:</strong> 1 Clinic, 1 Doctor, 3 Patients, 5 Medicines</li>
+          <li><strong>Indexes:</strong> Optimized for fast queries</li>
+          <li><strong>Relationships:</strong> All foreign keys properly set</li>
+          <li><strong>Ready to Use:</strong> Start adding real data immediately</li>
+        </ul>
+      </div>
+
+      <div class="mt-8 bg-blue-900 text-white p-8 rounded-2xl">
+        <h3 class="text-2xl font-bold mb-4">🚀 Next Steps After Running SQL:</h3>
+        <ol class="list-decimal list-inside space-y-3 text-lg">
+          <li>Verify all tables are created (check Tables section in Supabase)</li>
+          <li>Confirm demo data is inserted</li>
+          <li>Share confirmation with me</li>
+          <li>I'll connect the application to database</li>
+          <li>You'll have a fully functional app with real data!</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function copySQL() {
+      const sqlCode = document.getElementById('sqlCode').textContent;
+      navigator.clipboard.writeText(sqlCode).then(() => {
+        alert('✅ SQL copied to clipboard! Now paste it in Supabase SQL Editor.');
+      });
+    }
+  </script>
+</body>
+</html>
